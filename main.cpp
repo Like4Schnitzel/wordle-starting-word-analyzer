@@ -8,6 +8,22 @@
 
 using namespace std;
 
+bool overlappingLetters(const string& a, const string& b)
+{
+    for (auto letterA : a)
+    {
+        for (auto letterB : b)
+        {
+            if (letterB == letterA)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 int main()
 {
     auto start = chrono::high_resolution_clock::now();
@@ -34,28 +50,15 @@ int main()
                     break;
                 }
 
-                string firstWord = words[i+start];
+                const string& firstWord = words[i+start];
                 int remainingWords = 0;
 
-                for (auto checkedWord : words)
+                for (const auto& checkedWord : words)
                 {
-                    bool isValid = true;
-
-                    for (auto letter : firstWord)
+                    if (!overlappingLetters(firstWord, checkedWord))
                     {
-                        for (auto checkedLetter : checkedWord)
-                        {
-                            if (checkedLetter == letter)
-                            {
-                                isValid = false;
-                                break;
-                            }
-                        }
-
-                        if (!isValid) break;
+                        remainingWords++;
                     }
-
-                    if (isValid) remainingWords++;
                 }
 
                 threadResults[currentThread][i] = remainingWords;
@@ -69,7 +72,7 @@ int main()
     {
         thread.join();
 
-        for (auto result : threadResults[i])
+        for (const auto& result : threadResults[i])
         {
             results[j] = result;
             j++;
