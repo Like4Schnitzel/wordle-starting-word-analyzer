@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-std::vector<std::string> words =
+std::string words[] =
 {
     "AARON",
     "ABACI",
