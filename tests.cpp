@@ -10,6 +10,9 @@ int main()
 
    assert(overlappingLettersWithNumbers(wordToNumber("APPLE"), wordToNumber("PEARS")) == true);
    assert(overlappingLettersWithNumbers(wordToNumber("APPLE"), wordToNumber("BINGO")) == false);
+
+   assert(mostFrequentLetterInWord(wordToNumber("APPLE")) == 'E');
+   assert(mostFrequentLetterInWord(wordToNumber("BOBBY")) == 'O');
    
    std::cout << "All tests passed ^-^\n";
    return 0;

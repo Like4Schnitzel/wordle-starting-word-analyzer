@@ -1,6 +1,19 @@
-#include <cstdint>
-#include <iostream>
-#include <string.h>
+#include "lib.hpp"
+
+const std::string LETTERS_BY_FREQUENCY = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
+
+char mostFrequentLetterInWord(const uint32_t word)
+{
+    for (const auto letter : LETTERS_BY_FREQUENCY)
+    {
+        if (overlappingLettersWithNumbers(1 << (letter - 'A'), word))
+        {
+            return letter;
+        }
+    }
+
+    throw std::invalid_argument("There should be only capital english letters in the word.");
+}
 
 bool overlappingLetters(const std::string& a, const std::string& b)
 {
