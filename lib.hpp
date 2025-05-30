@@ -1,6 +1,9 @@
 #include <cstdint>
 #include <iostream>
 #include <string.h>
+#pragma once
+
+const std::string LETTERS_BY_FREQUENCY = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
 
 char mostFrequentLetterInWord(const uint32_t word);
 

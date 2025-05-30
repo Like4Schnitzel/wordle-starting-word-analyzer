@@ -1,7 +1,5 @@
 #include "lib.hpp"
 
-const std::string LETTERS_BY_FREQUENCY = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
-
 char mostFrequentLetterInWord(const uint32_t word)
 {
     for (const auto letter : LETTERS_BY_FREQUENCY)
