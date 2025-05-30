@@ -4,11 +4,14 @@
 #include <ranges>
 #include <fstream>
 #include <thread>
+#include <chrono>
 
 using namespace std;
 
 int main()
 {
+    auto start = chrono::high_resolution_clock::now();
+    
     constexpr int wordAmount = sizeof(words)/sizeof(*words);
     constexpr int threadCount = 16;
     constexpr int divisibleWordAmount = (1 + wordAmount / threadCount) * threadCount;
@@ -75,6 +78,11 @@ int main()
     }
 
     ranges::sort(ranges::views::zip(results, words));
+    
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
+    cout << "Calculations done! Took " << duration << ".\n";
+
     ofstream outputFile("results.txt");
     for (int i = 0; i < wordAmount; i++)
     {
