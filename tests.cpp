@@ -7,6 +7,9 @@ int main()
    assert(overlappingLetters("APPLE", "BINGO") == false);
 
    assert(wordToNumber("APPLE") == 0b00000000000000001000100000010001);
+
+   assert(overlappingLettersWithNumbers(wordToNumber("APPLE"), wordToNumber("PEARS")) == true);
+   assert(overlappingLettersWithNumbers(wordToNumber("APPLE"), wordToNumber("BINGO")) == false);
    
    std::cout << "All tests passed ^-^\n";
    return 0;

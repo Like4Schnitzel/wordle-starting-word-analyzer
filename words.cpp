@@ -1,7 +1,7 @@
 #include <iostream>
-#include <vector>
+#include <array>
 
-std::string words[] =
+std::array words = std::to_array<std::string>(
 {
     "AARON",
     "ABACI",
@@ -6226,4 +6226,4 @@ std::string words[] =
     "ZOSMA",
     "ZUKOR",
     "ZULUS"
-};
+});

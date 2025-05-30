@@ -13,10 +13,11 @@ int main()
 {
     auto start = chrono::high_resolution_clock::now();
     
-    constexpr int wordAmount = sizeof(words)/sizeof(*words);
+    constexpr int wordAmount = words.size();
     constexpr int threadCount = 16;
     constexpr int divisibleWordAmount = (1 + wordAmount / threadCount) * threadCount;
     constexpr int wordsPerThread = divisibleWordAmount / threadCount;
+    const auto wordHashes = wordsToNumbers(words);
     vector<thread> threads;
     threads.reserve(threadCount);
     int threadResults[threadCount][wordsPerThread];
@@ -25,9 +26,10 @@ int main()
 
     for (int currentThread = 0; currentThread < threadCount; currentThread++)
     {
-        threads.emplace_back([&threadResults, currentThread, wordAmount]()
+        threads.emplace_back([&threadResults, currentThread, wordAmount, &wordHashes]()
         {
             const int start = wordsPerThread * currentThread;
+            const auto currentThreadResults = threadResults[currentThread];
             for (int i = 0; i < wordsPerThread; i++)
             {
                 if (i + start > wordAmount)
@@ -35,18 +37,18 @@ int main()
                     break;
                 }
 
-                const string& firstWord = words[i+start];
+                const uint32_t firstWord = wordHashes[i+start];
                 int remainingWords = 0;
 
-                for (const auto& checkedWord : words)
+                for (const uint32_t checkedWord : wordHashes)
                 {
-                    if (!overlappingLetters(firstWord, checkedWord))
+                    if (!overlappingLettersWithNumbers(firstWord, checkedWord))
                     {
                         remainingWords++;
                     }
                 }
 
-                threadResults[currentThread][i] = remainingWords;
+                currentThreadResults[i] = remainingWords;
             }
         });
     }
@@ -57,7 +59,7 @@ int main()
     {
         thread.join();
 
-        for (const auto& result : threadResults[i])
+        for (const int result : threadResults[i])
         {
             results[j] = result;
             j++;
@@ -68,7 +70,7 @@ int main()
     ranges::sort(ranges::views::zip(results, words));
     
     auto stop = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Calculations done! Took " << duration << ".\n";
 
     ofstream outputFile("results.txt");
