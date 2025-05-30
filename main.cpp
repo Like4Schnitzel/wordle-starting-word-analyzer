@@ -1,4 +1,5 @@
 #include "words.cpp"
+#include "lib.cpp"
 #include <string.h>
 #include <algorithm>
 #include <ranges>
@@ -7,22 +8,6 @@
 #include <chrono>
 
 using namespace std;
-
-bool overlappingLetters(const string& a, const string& b)
-{
-    for (auto letterA : a)
-    {
-        for (auto letterB : b)
-        {
-            if (letterB == letterA)
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
 
 int main()
 {
