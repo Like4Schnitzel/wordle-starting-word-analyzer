@@ -1,5 +1,6 @@
 #include <iostream>
 #include <array>
+#pragma once
 
 std::array words = std::to_array<std::string>(
 {

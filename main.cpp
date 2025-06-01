@@ -1,4 +1,4 @@
-#include "words.cpp"
+#include "words.hpp"
 #include "lib.hpp"
 #include "bucketCollection.hpp"
 #include <string.h>
