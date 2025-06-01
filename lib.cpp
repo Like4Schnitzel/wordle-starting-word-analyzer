@@ -18,7 +18,7 @@ bool overlappingLetters(const std::string& a, const std::string& b)
     return false;
 }
 
-bool overlappingLettersWithNumbers(const uint32_t a, const uint32_t b)
+inline bool overlappingLettersWithNumbers(const uint32_t a, const uint32_t b)
 {
     return a & b;
 }

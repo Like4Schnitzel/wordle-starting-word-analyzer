@@ -11,8 +11,6 @@ using namespace std;
 
 int main()
 {
-    auto start = chrono::high_resolution_clock::now();
-    
     constexpr int wordAmount = words.size();
     constexpr int threadCount = 16;
     constexpr int divisibleWordAmount = (1 + wordAmount / threadCount) * threadCount;
@@ -21,8 +19,9 @@ int main()
     vector<thread> threads;
     threads.reserve(threadCount);
     int threadResults[threadCount][wordsPerThread];
-
+    
     int results[wordAmount];
+    auto start = chrono::high_resolution_clock::now();
 
     for (int currentThread = 0; currentThread < threadCount; currentThread++)
     {
@@ -42,10 +41,7 @@ int main()
 
                 for (const uint32_t checkedWord : wordHashes)
                 {
-                    if (!overlappingLettersWithNumbers(firstWord, checkedWord))
-                    {
-                        remainingWords++;
-                    }
+                    remainingWords += !overlappingLettersWithNumbers(firstWord, checkedWord);
                 }
 
                 currentThreadResults[i] = remainingWords;
@@ -67,12 +63,12 @@ int main()
         i++;
     }
 
-    ranges::sort(ranges::views::zip(results, words));
     
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Calculations done! Took " << duration << ".\n";
-
+    
+    ranges::sort(ranges::views::zip(results, words));
     ofstream outputFile("results.txt");
     for (int i = 0; i < wordAmount; i++)
     {
