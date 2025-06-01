@@ -1,5 +1,6 @@
 #include "words.cpp"
-#include "lib.cpp"
+#include "lib.hpp"
+#include "bucketCollection.hpp"
 #include <string.h>
 #include <algorithm>
 #include <ranges>
@@ -11,22 +12,27 @@ using namespace std;
 
 int main()
 {
-    auto start = chrono::high_resolution_clock::now();
-    
     constexpr int wordAmount = words.size();
+    
     constexpr int threadCount = 16;
     constexpr int divisibleWordAmount = (1 + wordAmount / threadCount) * threadCount;
     constexpr int wordsPerThread = divisibleWordAmount / threadCount;
-    const auto wordHashes = wordsToNumbers(words);
     vector<thread> threads;
     threads.reserve(threadCount);
     int threadResults[threadCount][wordsPerThread];
-
+    
+    BucketCollection<string, wordAmount, LETTERS> sortedWords = sortWordsByMostFrequentLetter(words);
+    const auto bucketIndices = sortedWords.getBucketIndices();
+    auto sortedWordsArray = sortedWords.toArray();
+    const auto wordHashes = wordsToNumbers(sortedWordsArray);
+    
     int results[wordAmount];
+    
+    auto start = chrono::high_resolution_clock::now();
 
     for (int currentThread = 0; currentThread < threadCount; currentThread++)
     {
-        threads.emplace_back([&threadResults, currentThread, wordAmount, &wordHashes]()
+        threads.emplace_back([&threadResults, &bucketIndices, currentThread, wordAmount, &wordHashes]()
         {
             const int start = wordsPerThread * currentThread;
             const auto currentThreadResults = threadResults[currentThread];
@@ -40,11 +46,18 @@ int main()
                 const uint32_t firstWord = wordHashes[i+start];
                 int remainingWords = 0;
 
-                for (const uint32_t checkedWord : wordHashes)
+                for (int j = 0; j < LETTERS; j++)
                 {
-                    if (!overlappingLettersWithNumbers(firstWord, checkedWord))
+                    if (overlappingLettersWithNumbers(firstWord, 1 << (LETTERS_BY_FREQUENCY[j] - 'A')))
                     {
-                        remainingWords++;
+                        // skip the entire bucket
+                        continue;
+                    }
+
+                    const int endIndex = j+1 < LETTERS ? bucketIndices[j+1] : wordAmount;
+                    for (int k = bucketIndices[j]; k < endIndex; k++)
+                    {
+                        remainingWords += !overlappingLettersWithNumbers(firstWord, wordHashes[k]);
                     }
                 }
 
@@ -67,16 +80,16 @@ int main()
         i++;
     }
 
-    ranges::sort(ranges::views::zip(results, words));
-    
     auto stop = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Calculations done! Took " << duration << ".\n";
+    ranges::sort(ranges::views::zip(sortedWordsArray, results));
+    ranges::sort(ranges::views::zip(results, sortedWordsArray));
 
     ofstream outputFile("results.txt");
     for (int i = 0; i < wordAmount; i++)
     {
-        outputFile << words[i] << " " << results[i] << "\n";
+        outputFile << sortedWordsArray[i] << " " << results[i] << "\n";
     }
     outputFile.close();
 

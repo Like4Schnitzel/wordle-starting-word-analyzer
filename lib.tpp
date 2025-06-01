@@ -1,5 +1,11 @@
 #include "lib.hpp"
 
+int indexOf(const std::string& s, const char c)
+{
+    for (int i = 0; i < s.length(); i++) if (s[i] == c) return i;
+    return -1;
+}
+
 char mostFrequentLetterInWord(const uint32_t word)
 {
     for (const auto letter : LETTERS_BY_FREQUENCY)
@@ -29,7 +35,7 @@ bool overlappingLetters(const std::string& a, const std::string& b)
     return false;
 }
 
-bool overlappingLettersWithNumbers(const uint32_t a, const uint32_t b)
+inline bool overlappingLettersWithNumbers(const uint32_t a, const uint32_t b)
 {
     return a & b;
 }
@@ -42,19 +48,6 @@ uint32_t wordToNumber(const std::string& word)
     {
         const int alphabetPosition = letter - 'A';
         result |= 1 << alphabetPosition;
-    }
-
-    return result;
-}
-
-template<size_t n>
-std::array<uint32_t, n> wordsToNumbers(const std::array<std::string, n>& words)
-{
-    std::array<uint32_t, n> result;
-
-    for (int i = 0; i < n; i++)
-    {
-        result[i] = wordToNumber(words[i]);
     }
 
     return result;

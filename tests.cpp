@@ -1,4 +1,4 @@
-#include "lib.cpp"
+#include "lib.hpp"
 #include <cassert>
 
 int main()
