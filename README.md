@@ -3,4 +3,4 @@ Goes through a word list and checks, if the word were used as a starting word fo
 
 This is not really a good metric to judge how good of a starter the word is. This project is mainly an optimization exercise.
 
-Build with `g++ -std=c++23 main.cpp lib.cpp -o out/bin -O3`
+Build with `g++ -std=c++23 main.cpp -o out/bin -O3`
