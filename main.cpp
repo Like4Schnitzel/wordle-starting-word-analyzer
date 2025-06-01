@@ -13,76 +13,84 @@ using namespace std;
 int main()
 {
     constexpr int wordAmount = words.size();
-    
+
     constexpr int threadCount = 16;
     constexpr int divisibleWordAmount = (1 + wordAmount / threadCount) * threadCount;
     constexpr int wordsPerThread = divisibleWordAmount / threadCount;
     vector<thread> threads;
-    threads.reserve(threadCount);
+    threads.resize(threadCount);
     int threadResults[threadCount][wordsPerThread];
-    
+
     BucketCollection<string, wordAmount, LETTERS> sortedWords = sortWordsByMostFrequentLetter(words);
     const auto bucketIndices = sortedWords.getBucketIndices();
     auto sortedWordsArray = sortedWords.toArray();
     const auto wordHashes = wordsToNumbers(sortedWordsArray);
-    
+
     int results[wordAmount];
-    
-    auto start = chrono::high_resolution_clock::now();
 
-    for (int currentThread = 0; currentThread < threadCount; currentThread++)
+    constexpr int runs = 1000;
+    array<chrono::microseconds, runs> times = array<chrono::microseconds, runs>();
+    for (int currentRun = 0; currentRun < runs; currentRun++)
     {
-        threads.emplace_back([&threadResults, &bucketIndices, currentThread, wordAmount, &wordHashes]()
+        auto start = chrono::high_resolution_clock::now();
+
+        for (int currentThread = 0; currentThread < threadCount; currentThread++)
         {
-            const int start = wordsPerThread * currentThread;
-            const auto currentThreadResults = threadResults[currentThread];
-            for (int i = 0; i < wordsPerThread; i++)
+            threads[currentThread] = thread([&threadResults, &bucketIndices, currentThread, wordAmount, &wordHashes]()
             {
-                if (i + start > wordAmount)
+                const int start = wordsPerThread * currentThread;
+                const auto currentThreadResults = threadResults[currentThread];
+                for (int i = 0; i < wordsPerThread; i++)
                 {
-                    break;
-                }
-
-                const uint32_t firstWord = wordHashes[i+start];
-                int remainingWords = 0;
-
-                for (int j = 0; j < LETTERS; j++)
-                {
-                    if (overlappingLettersWithNumbers(firstWord, 1 << (LETTERS_BY_FREQUENCY[j] - 'A')))
+                    if (i + start > wordAmount)
                     {
-                        // skip the entire bucket
-                        continue;
+                        break;
                     }
 
-                    const int endIndex = j+1 < LETTERS ? bucketIndices[j+1] : wordAmount;
-                    for (int k = bucketIndices[j]; k < endIndex; k++)
+                    const uint32_t firstWord = wordHashes[i+start];
+                    int remainingWords = 0;
+
+                    for (int j = 0; j < LETTERS; j++)
                     {
-                        remainingWords += !overlappingLettersWithNumbers(firstWord, wordHashes[k]);
+                        if (overlappingLettersWithNumbers(firstWord, 1 << (LETTERS_BY_FREQUENCY[j] - 'A')))
+                        {
+                            // skip the entire bucket
+                            continue;
+                        }
+
+                        const int endIndex = j+1 < LETTERS ? bucketIndices[j+1] : wordAmount;
+                        for (int k = bucketIndices[j]; k < endIndex; k++)
+                        {
+                            remainingWords += !overlappingLettersWithNumbers(firstWord, wordHashes[k]);
+                        }
                     }
+
+                    currentThreadResults[i] = remainingWords;
                 }
-
-                currentThreadResults[i] = remainingWords;
-            }
-        });
-    }
-
-    int i = 0;
-    int j = 0;
-    for (auto& thread : threads)
-    {
-        thread.join();
-
-        for (const int result : threadResults[i])
-        {
-            results[j] = result;
-            j++;
+            });
         }
-        i++;
+
+        int i = 0;
+        int j = 0;
+        for (auto& thread : threads)
+        {
+            thread.join();
+
+            for (const int result : threadResults[i])
+            {
+                results[j] = result;
+                j++;
+            }
+            i++;
+        }
+        auto stop = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+        times[currentRun] = duration;
     }
 
-    auto stop = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-    cout << "Calculations done! Took " << duration << ".\n";
+    chrono::microseconds minTime = times[0];
+    for (const auto& time : times) if (time < minTime) minTime = time;
+    cout << "Calculations done! Quickest run took " << minTime << ".\n";
     ranges::sort(ranges::views::zip(sortedWordsArray, results));
     ranges::sort(ranges::views::zip(results, sortedWordsArray));
 
